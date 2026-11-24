@@ -1,0 +1,51 @@
+name: Validar y desplegar
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Validar y desplegar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validar HTML
+        run: npx --yes html-validate@9 index.html
+
+      - name: Comprobar enlaces
+        run: python3 scripts/check-links.py
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Preparar artefacto
+        run: |
+          mkdir -p _site/cv
+          cp index.html styles.css script.js favicon.svg og-image.png .nojekyll _site/
+          cp cv/CV_Juan_Agudelo_Castrillon.pdf _site/cv/
+
+      - name: Subir artefacto
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Desplegar
+        id: deployment
+        uses: actions/deploy-pages@v4
