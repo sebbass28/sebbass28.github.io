@@ -42,7 +42,7 @@ jobs:
           cp cv/CV_Juan_Agudelo_Castrillon.pdf _site/cv/
 
       - name: Subir artefacto
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: _site
 
